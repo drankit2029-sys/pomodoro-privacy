@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth" __gcrremoteframetoken="0df79de001322009ac7f7e4f7b013086"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIwODUzMzA4MTkzNDYwODMyNDk3MyIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjX2M1ZGNiNzVjNzdmYjNmNGZfaW5kZXguaHRtbC01MzAifSwiZXhwIjoxNzkzMDI0MzAyLCJpYXQiOjE3OTMwMjA3MDIsImFsZyI6IlJTMjU2In0.AD-PQ_C6jzTQiVyQ_hHL1d8iEYXneN5kR-roiYN2uRnpDeA6SbC68ivuvmAjPUZ-2CYZ4omLrO8-o7BV2OJ8UwNqnhNlML-xjUbEvLrMhxbG53l_jJsOzPEiWThqI7oXVse2Y60Sb5mSslOJ4QL0l-7VojgBoe_0lsRcUWtxaUKJ4rEeJiXk8Enuh9SYFFdFNJr0FgKhsA_W0L-9KGYz_huOUMa8bM_m8AmuXMA9BQ257KoQwRhNyvEKiv6oqqNFacwIQ5U5NVwIwuNsXaNgBOgqWRjm1_bJz_gaSrr5q5Ya4qbgVCvc7-94XXCqPyeW2LL5v1HANHB2IILAh54hCw","c_c5dcb75c77fb3f4f_index.html-530")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy — Pomodoro · Study / Rhythm</title>
+    <meta name="description" content="Official Privacy Policy and Data Safety documentation for Pomodoro (com.studyapp.pomodoro) — A softer way to protect your focus.">
+    <meta name="theme-color" content="#FAF9F4">
+
+    <!-- Google Fonts: Cormorant (matching app's res/font/cormorant_*.ttf) & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;0,600;1,400&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Configure Tailwind with exact tokens from Color.kt & Type.kt -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ivory: '#FAF9F4',
+                        paper: '#FDFBF6',
+                        parchment: '#F2EEE4',
+                        forest: '#0F5132',
+                        'forest-deep': '#0A3D26',
+                        mint: '#B7D9C1',
+                        'mint-light': '#E4EFE6',
+                        stone: '#D6D3C8',
+                        'stone-light': '#E9E5DA',
+                        ink: '#1F2B23',
+                        muted: '#7E8378',
+                        'muted-light': '#A4A79D',
+                        border: '#EDE8DC',
+                        error: '#A63A3A',
+                    },
+                    fontFamily: {
+                        serif: ['Cormorant', 'Georgia', 'serif'],
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft-raised': '0 9px 24px -4px rgba(112, 107, 93, 0.16), 0 2px 6px -1px rgba(112, 107, 93, 0.08)',
+                        'soft-sm': '0 4px 12px -2px rgba(112, 107, 93, 0.14), 0 1px 3px 0 rgba(112, 107, 93, 0.08)',
+                        'soft-button': '0 6px 16px -3px rgba(15, 81, 50, 0.28), 0 2px 5px -1px rgba(15, 81, 50, 0.16)',
+                    }
+                }
+            }
+        };
+    </script>
+
+    <style>
+        /* Custom styles replicating SoftSurface.kt and Android Compose typography */
+        body {
+            background-color: #FAF9F4;
+            color: #1F2B23;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Replicates Modifier.softRaised(Paper, 24.dp, 8.dp, highlight = true) */
+        .soft-card {
+            background-color: #FDFBF6;
+            border-radius: 26px;
+            border: 1px solid rgba(255, 255, 255, 0.78);
+            box-shadow:
+                0 10px 28px -6px rgba(112, 107, 93, 0.15),
+                0 2px 8px -2px rgba(112, 107, 93, 0.08),
+                0 0 0 1px rgba(237, 232, 220, 0.65);
+        }
+
+        /* Replicates ModeTabs container on Parchment */
+        .soft-parchment-pill {
+            background-color: #F2EEE4;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            box-shadow: inset 0 1px 2px rgba(112, 107, 93, 0.08), 0 2px 6px rgba(112, 107, 93, 0.06);
+        }
+
+        /* Replicates SoftIconButton */
+        .soft-icon-btn {
+            background-color: #FDFBF6;
+            border-radius: 9999px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow:
+                0 4px 10px -2px rgba(112, 107, 93, 0.18),
+                0 0 0 1px rgba(237, 232, 220, 0.8);
+            transition: all 0.18s ease;
+        }
+        .soft-icon-btn:hover {
+            background-color: #F2EEE4;
+            transform: translateY(-1px);
+        }
+        .soft-icon-btn:active {
+            background-color: #E9E5DA;
+            transform: translateY(0);
+        }
+
+        /* Replicates SoftButton Primary */
+        .soft-btn-primary {
+            background-color: #0F5132;
+            color: #FAF9F4;
+            border-radius: 27px;
+            box-shadow: 0 6px 16px -3px rgba(15, 81, 50, 0.28), 0 2px 5px -1px rgba(15, 81, 50, 0.15);
+            transition: all 0.18s ease;
+        }
+        .soft-btn-primary:hover {
+            background-color: #0A3D26;
+        }
+
+        /* Replicates SoftButton Secondary */
+        .soft-btn-secondary {
+            background-color: #FDFBF6;
+            color: #1F2B23;
+            border-radius: 27px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow:
+                0 4px 12px -2px rgba(112, 107, 93, 0.14),
+                0 0 0 1px rgba(237, 232, 220, 0.85);
+            transition: all 0.18s ease;
+        }
+        .soft-btn-secondary:hover {
+            background-color: #E9E5DA;
+        }
+
+        /* Tabular lining numerals as used in Type.kt ("lnum, tnum") */
+        .num-tabular {
+            font-variant-numeric: lining-nums tabular-nums;
+            font-feature-settings: "lnum", "tnum";
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FAF9F4;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D6D3C8;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #7E8378;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background-color: #FFFFFF;
+            }
+            .soft-card {
+                box-shadow: none;
+                border: 1px solid #D6D3C8;
+                break-inside: avoid;
+            }
+        }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:Inter, -apple-system, BlinkMacSystemFont, sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.fixed{position:fixed}.relative{position:relative}.inset-0{inset:0px}.right-0{right:0px}.top-0{top:0px}.z-0{z-index:0}.z-10{z-index:10}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.my-4{margin-top:1rem;margin-bottom:1rem}.mb-1{margin-bottom:0.25rem}.mb-1\.5{margin-bottom:0.375rem}.mb-2\.5{margin-bottom:0.625rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.mb-7{margin-bottom:1.75rem}.mb-8{margin-bottom:2rem}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.mt-1\.5{margin-top:0.375rem}.mt-3{margin-top:0.75rem}.mt-4{margin-top:1rem}.mt-5{margin-top:1.25rem}.block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-1\.5{height:0.375rem}.h-10{height:2.5rem}.h-11{height:2.75rem}.h-3\.5{height:0.875rem}.h-4{height:1rem}.h-44{height:11rem}.h-5{height:1.25rem}.h-8{height:2rem}.h-\[1px\]{height:1px}.min-h-\[44px\]{min-height:44px}.min-h-screen{min-height:100vh}.w-1\.5{width:0.375rem}.w-10{width:2.5rem}.w-11{width:2.75rem}.w-3\.5{width:0.875rem}.w-4{width:1rem}.w-44{width:11rem}.w-5{width:1.25rem}.w-7{width:1.75rem}.w-8{width:2rem}.w-full{width:100%}.max-w-3xl{max-width:48rem}.max-w-md{max-width:28rem}.shrink-0{flex-shrink:0}.border-collapse{border-collapse:collapse}.-translate-y-4{--tw-translate-y:-1rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.translate-x-10{--tw-translate-x:2.5rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-2\.5{gap:0.625rem}.gap-3{gap:0.75rem}.gap-3\.5{gap:0.875rem}.gap-4{gap:1rem}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-2\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.625rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.625rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-3\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.875rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.875rem * var(--tw-space-y-reverse))}.divide-y > :not([hidden]) ~ :not([hidden]){--tw-divide-y-reverse:0;border-top-width:calc(1px * calc(1 - var(--tw-divide-y-reverse)));border-bottom-width:calc(1px * var(--tw-divide-y-reverse))}.divide-border > :not([hidden]) ~ :not([hidden]){--tw-divide-opacity:1;border-color:rgb(237 232 220 / var(--tw-divide-opacity, 1))}.self-start{align-self:flex-start}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-x-hidden{overflow-x:hidden}.scroll-smooth{scroll-behavior:smooth}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-\[20px\]{border-radius:20px}.rounded-full{border-radius:9999px}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-x{border-left-width:1px;border-right-width:1px}.border-y{border-top-width:1px;border-bottom-width:1px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-border{--tw-border-opacity:1;border-color:rgb(237 232 220 / var(--tw-border-opacity, 1))}.border-mint{--tw-border-opacity:1;border-color:rgb(183 217 193 / var(--tw-border-opacity, 1))}.border-stone\/60{border-color:rgb(214 211 200 / 0.6)}.bg-forest{--tw-bg-opacity:1;background-color:rgb(15 81 50 / var(--tw-bg-opacity, 1))}.bg-ink\/30{background-color:rgb(31 43 35 / 0.3)}.bg-mint{--tw-bg-opacity:1;background-color:rgb(183 217 193 / var(--tw-bg-opacity, 1))}.bg-mint-light{--tw-bg-opacity:1;background-color:rgb(228 239 230 / var(--tw-bg-opacity, 1))}.bg-mint-light\/60{background-color:rgb(228 239 230 / 0.6)}.bg-paper{--tw-bg-opacity:1;background-color:rgb(253 251 246 / var(--tw-bg-opacity, 1))}.bg-parchment{--tw-bg-opacity:1;background-color:rgb(242 238 228 / var(--tw-bg-opacity, 1))}.bg-parchment\/60{background-color:rgb(242 238 228 / 0.6)}.bg-parchment\/70{background-color:rgb(242 238 228 / 0.7)}.bg-stone{--tw-bg-opacity:1;background-color:rgb(214 211 200 / var(--tw-bg-opacity, 1))}.p-1{padding:0.25rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.px-1\.5{padding-left:0.375rem;padding-right:0.375rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-3\.5{padding-top:0.875rem;padding-bottom:0.875rem}.pb-20{padding-bottom:5rem}.pb-8{padding-bottom:2rem}.pt-1{padding-top:0.25rem}.pt-2{padding-top:0.5rem}.pt-3{padding-top:0.75rem}.pt-8{padding-top:2rem}.text-left{text-align:left}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.font-serif{font-family:Cormorant, Georgia, serif}.text-2xl{font-size:1.5rem;line-height:2rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-\[13px\]{font-size:13px}.text-base{font-size:1rem;line-height:1.5rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-light{font-weight:300}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-none{line-height:1}.leading-relaxed{line-height:1.625}.leading-snug{line-height:1.375}.leading-tight{line-height:1.25}.tracking-\[0\.12em\]{letter-spacing:0.12em}.tracking-\[0\.14em\]{letter-spacing:0.14em}.tracking-\[0\.16em\]{letter-spacing:0.16em}.tracking-\[0\.26em\]{letter-spacing:0.26em}.tracking-\[0\.2em\]{letter-spacing:0.2em}.tracking-wider{letter-spacing:0.05em}.text-forest{--tw-text-opacity:1;color:rgb(15 81 50 / var(--tw-text-opacity, 1))}.text-ink{--tw-text-opacity:1;color:rgb(31 43 35 / var(--tw-text-opacity, 1))}.text-ink\/90{color:rgb(31 43 35 / 0.9)}.text-ivory{--tw-text-opacity:1;color:rgb(250 249 244 / var(--tw-text-opacity, 1))}.text-muted{--tw-text-opacity:1;color:rgb(126 131 120 / var(--tw-text-opacity, 1))}.text-muted-light{--tw-text-opacity:1;color:rgb(164 167 157 / var(--tw-text-opacity, 1))}.opacity-95{opacity:0.95}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-soft-sm{--tw-shadow:0 4px 12px -2px rgba(112, 107, 93, 0.14), 0 1px 3px 0 rgba(112, 107, 93, 0.08);--tw-shadow-colored:0 4px 12px -2px var(--tw-shadow-color), 0 1px 3px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.backdrop-blur-\[2px\]{--tw-backdrop-blur:blur(2px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.selection\:bg-mint *::selection{--tw-bg-opacity:1;background-color:rgb(183 217 193 / var(--tw-bg-opacity, 1))}.selection\:text-forest *::selection{--tw-text-opacity:1;color:rgb(15 81 50 / var(--tw-text-opacity, 1))}.selection\:bg-mint::selection{--tw-bg-opacity:1;background-color:rgb(183 217 193 / var(--tw-bg-opacity, 1))}.selection\:text-forest::selection{--tw-text-opacity:1;color:rgb(15 81 50 / var(--tw-text-opacity, 1))}.hover\:text-ink:hover{--tw-text-opacity:1;color:rgb(31 43 35 / var(--tw-text-opacity, 1))}.hover\:underline:hover{-webkit-text-decoration-line:underline;text-decoration-line:underline}.focus\:border-forest:focus{--tw-border-opacity:1;border-color:rgb(15 81 50 / var(--tw-border-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}@media (min-width: 640px){.sm\:h-64{height:16rem}.sm\:w-64{width:16rem}.sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.sm\:grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}.sm\:flex-row{flex-direction:row}.sm\:items-center{align-items:center}.sm\:self-center{align-self:center}.sm\:p-5{padding:1.25rem}.sm\:p-6{padding:1.5rem}.sm\:p-7{padding:1.75rem}.sm\:px-8{padding-left:2rem;padding-right:2rem}.sm\:text-3xl{font-size:1.875rem;line-height:2.25rem}.sm\:text-5xl{font-size:3rem;line-height:1}.sm\:text-\[11px\]{font-size:11px}.sm\:text-\[15px\]{font-size:15px}.sm\:text-\[28px\]{font-size:28px}.sm\:text-base{font-size:1rem;line-height:1.5rem}}</style></head>
+<body class="relative min-h-screen overflow-x-hidden selection:bg-mint selection:text-forest">
+
+    <!-- Exact BotanicalBranch.kt Canvas Recreation in SVG (Top-Right Decorative Element) -->
+    <div class="pointer-events-none fixed top-0 right-0 z-0 overflow-hidden" aria-hidden="true">
+        <svg class="w-44 h-44 sm:w-64 sm:h-64 translate-x-10 -translate-y-4 opacity-95" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Stem Path from BotanicalBranch.kt -->
+            <path d="M 196 4 C 168 12, 144 36, 128 64 C 112 92, 84 110, 54 120 C 36 126, 20 128, 6 124" stroke="#0F5132" stroke-opacity="0.42" stroke-width="2.2" stroke-linecap="round"></path>
+            <!-- Leaves exactly matching drawLeaf() offsets and rotations in BotanicalBranch.kt -->
+            <g transform="translate(174, 20) rotate(-38)">
+                <ellipse cx="0" cy="0" rx="21" ry="7.5" fill="#0F5132" fill-opacity="0.24"></ellipse>
+                <line x1="-17.6" y1="0" x2="17.6" y2="0" stroke="#0F5132" stroke-opacity="0.18" stroke-width="1.1" stroke-linecap="round"></line>
+            </g>
+            <g transform="translate(156, 32) rotate(-72)">
+                <ellipse cx="0" cy="0" rx="18" ry="6.5" fill="#B7D9C1" fill-opacity="0.58"></ellipse>
+                <line x1="-15.1" y1="0" x2="15.1" y2="0" stroke="#B7D9C1" stroke-opacity="0.44" stroke-width="1.1" stroke-linecap="round"></line>
+            </g>
+            <g transform="translate(144, 48) rotate(-12)">
+                <ellipse cx="0" cy="0" rx="19" ry="7.0" fill="#0F5132" fill-opacity="0.22"></ellipse>
+                <line x1="-16" y1="0" x2="16" y2="0" stroke="#0F5132" stroke-opacity="0.17" stroke-width="1.1" stroke-linecap="round"></line>
+            </g>
+            <g transform="translate(132, 62) rotate(-60)">
+                <ellipse cx="0" cy="0" rx="17" ry="6.0" fill="#B7D9C1" fill-opacity="0.55"></ellipse>
+                <line x1="-14.3" y1="0" x2="14.3" y2="0" stroke="#B7D9C1" stroke-opacity="0.41" stroke-width="1.1" stroke-linecap="round"></line>
+            </g>
+            <g transform="translate(118, 80) rotate(24)">
+                <ellipse cx="0" cy="0" rx="18" ry="6.5" fill="#0F5132" fill-opacity="0.20"></ellipse>
+                <line x1="-15.1" y1="0" x2="15.1" y2="0" stroke="#0F5132" stroke-opacity="0.15" stroke-width="1.1" stroke-linecap="round"></line>
+            </g>
+            <g transform="translate(102, 96) rotate(-44)">
+                <ellipse cx="0" cy="0" rx="16" ry="5.8" fill="#B7D9C1" fill-opacity="0.52"></ellipse>
+                <line x1="-13.4" y1="0" x2="13.4" y2="0" stroke="#B7D9C1" stroke-opacity="0.39" stroke-width="1.1" stroke-linecap="round"></line>
+            </g>
+            <g transform="translate(82, 108) rotate(32)">
+                <ellipse cx="0" cy="0" rx="17" ry="6.0" fill="#0F5132" fill-opacity="0.18"></ellipse>
+                <line x1="-14.3" y1="0" x2="14.3" y2="0" stroke="#0F5132" stroke-opacity="0.14" stroke-width="1.1" stroke-linecap="round"></line>
+            </g>
+            <g transform="translate(62, 116) rotate(-28)">
+                <ellipse cx="0" cy="0" rx="15" ry="5.5" fill="#B7D9C1" fill-opacity="0.48"></ellipse>
+                <line x1="-12.6" y1="0" x2="12.6" y2="0" stroke="#B7D9C1" stroke-opacity="0.36" stroke-width="1.1" stroke-linecap="round"></line>
+            </g>
+            <g transform="translate(42, 122) rotate(38)">
+                <ellipse cx="0" cy="0" rx="14" ry="5.2" fill="#0F5132" fill-opacity="0.16"></ellipse>
+                <line x1="-11.8" y1="0" x2="11.8" y2="0" stroke="#0F5132" stroke-opacity="0.12" stroke-width="1.1" stroke-linecap="round"></line>
+            </g>
+        </svg>
+    </div>
+
+    <!-- Main Container -->
+    <main class="relative z-10 mx-auto max-w-3xl px-5 sm:px-8 pt-8 pb-20">
+
+        <!-- App-Style Header (Replicating Header() in PomodoroScreen.kt) -->
+        <header class="mb-8">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <!-- App Icon Vector from ic_launcher_foreground.xml -->
+                        <div class="w-10 h-10 rounded-2xl bg-paper border border-border shadow-soft-sm flex items-center justify-center shrink-0">
+                            <svg class="w-8 h-8" viewBox="20 16 68 72" xmlns="http://www.w3.org/2000/svg" aria-label="Pomodoro App Icon">
+                                <path fill="#0F5132" d="M54,25a29,29 0,1 0,0 58a29,29 0,1 0,0 -58z"></path>
+                                <path fill="#FAF9F4" d="M51.8,35.5h4.4v13.7h-4.4z"></path>
+                                <path fill="#FAF9F4" d="M56.904,58.410L68.522,65.671L70.854,61.939L59.236,54.678Z"></path>
+                                <path fill="#FAF9F4" d="M50.8,54a3.2,3.2 0,1 0,6.4 0a3.2,3.2 0,1 0,-6.4 0z"></path>
+                                <path fill="#B7D9C1" d="M49.8,19.5h8.4v7h-8.4z"></path>
+                                <path fill="#B7D9C1" d="M50.5,29.5h7v2.4h-7z"></path>
+                            </svg>
+                        </div>
+                        <p class="font-serif font-light text-forest text-sm sm:text-base tracking-[0.26em] uppercase">
+                            STUDY / RHYTHM
+                        </p>
+                    </div>
+
+                    <h1 class="mt-3 font-serif font-normal text-4xl sm:text-5xl text-ink leading-tight">
+                        Pomodoro <span class="text-muted font-light">Privacy Policy</span>
+                    </h1>
+                    <p class="mt-1.5 text-muted text-sm sm:text-[15px]">
+                        A softer way to protect your focus — and a transparent look at how your data is handled.
+                    </p>
+                </div>
+
+                <!-- Action Buttons (Print & Customize Contact Info for GitHub Pages) -->
+                <div class="no-print flex items-center gap-2 shrink-0 pt-1">
+                    <button type="button" onclick="window.print()" title="Print or Save as PDF" aria-label="Print or Save Privacy Policy as PDF" class="soft-icon-btn w-11 h-11 flex items-center justify-center text-forest">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6v-8z"></path>
+                        </svg>
+                    </button>
+                    <button type="button" onclick="toggleConfigModal()" title="Customize Developer / Contact Details for GitHub Pages" aria-label="Customize Developer Details" class="soft-icon-btn w-11 h-11 flex items-center justify-center text-forest">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Metadata Badges & App Stone Rule -->
+            <div class="mt-5 flex flex-wrap items-center gap-2.5 text-xs text-muted">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-mint-light text-forest font-medium">
+                    <span class="w-1.5 h-1.5 rounded-full bg-forest"></span>
+                    Package: <code class="font-mono text-[11px]">com.studyapp.pomodoro</code>
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-parchment text-ink font-medium">
+                    Effective Date: <span id="display-effective-date" class="num-tabular">October 25, 2026</span>
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-parchment text-muted">
+                    App Version: <span class="num-tabular">1.0.0+</span> (Android)
+                </span>
+            </div>
+
+            <div class="mt-5 w-10 h-[1px] bg-stone"></div>
+        </header>
+
+        <!-- ModeTabs-Style Quick Filter / Navigation Bar (Replicating ModeTabs.kt) -->
+        <nav aria-label="Policy Sections" class="no-print mb-7">
+            <div class="soft-parchment-pill p-1 grid grid-cols-2 sm:grid-cols-4 gap-1">
+                <button type="button" onclick="filterSections('all')" id="tab-all" class="mode-tab min-h-[44px] px-3 py-2 rounded-[20px] text-xs font-medium transition-all bg-forest text-ivory shadow-sm">
+                    All Sections
+                </button>
+                <button type="button" onclick="filterSections('local')" id="tab-local" class="mode-tab min-h-[44px] px-3 py-2 rounded-[20px] text-xs font-normal transition-all text-muted hover:text-ink">
+                    On-Device Data
+                </button>
+                <button type="button" onclick="filterSections('ads')" id="tab-ads" class="mode-tab min-h-[44px] px-3 py-2 rounded-[20px] text-xs font-normal transition-all text-muted hover:text-ink">
+                    Ads &amp; Consent
+                </button>
+                <button type="button" onclick="filterSections('permissions')" id="tab-permissions" class="mode-tab min-h-[44px] px-3 py-2 rounded-[20px] text-xs font-normal transition-all text-muted hover:text-ink">
+                    Permissions &amp; Safety
+                </button>
+            </div>
+        </nav>
+
+        <!-- At-a-Glance Summary Card (Replicating RhythmCard.kt StatBlocks) -->
+        <section class="soft-card p-5 sm:p-7 mb-5" data-category="all local ads permissions">
+            <div class="flex items-center justify-between gap-2 mb-4">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-[11px] font-bold tracking-[0.12em] text-forest num-tabular">00</span>
+                    <h2 class="text-[11px] font-bold tracking-[0.16em] text-muted uppercase">PRIVACY AT A GLANCE</h2>
+                </div>
+                <span class="text-[10px] font-bold tracking-[0.14em] text-forest uppercase">NO ACCOUNT REQUIRED</span>
+            </div>
+
+            <!-- 3-Column Rhythm Stat Block Layout -->
+            <div class="grid grid-cols-3 items-center py-3 border-y border-border">
+                <div class="text-center px-2">
+                    <p class="font-serif font-medium text-2xl sm:text-3xl text-ink num-tabular">0</p>
+                    <p class="mt-1 text-[10px] sm:text-[11px] font-bold tracking-[0.14em] text-muted uppercase">DEVELOPER SERVERS</p>
+                </div>
+                <div class="border-x border-border text-center px-2">
+                    <p class="font-serif font-medium text-2xl sm:text-3xl text-ink num-tabular">100%</p>
+                    <p class="mt-1 text-[10px] sm:text-[11px] font-bold tracking-[0.14em] text-muted uppercase">LOCAL STUDY STATS</p>
+                </div>
+                <div class="text-center px-2">
+                    <p class="font-serif font-medium text-2xl sm:text-3xl text-ink num-tabular">1</p>
+                    <p class="mt-1 text-[10px] sm:text-[11px] font-bold tracking-[0.14em] text-muted uppercase">AD SDK (ADMOB + UMP)</p>
+                </div>
+            </div>
+
+            <p class="mt-4 text-[13px] leading-relaxed text-muted">
+                <strong class="text-ink font-semibold">Pomodoro</strong> (<code class="text-xs font-mono text-forest">com.studyapp.pomodoro</code>), developed by <span class="dev-name-text font-medium text-ink">Noxterus</span>, is designed as a calm, distraction-free focus timer. We do not operate any backend servers, require user registration, or collect your personal identity, focus history, or study schedules. All timer settings and daily session counts stay on your device. The app displays a single native advertisement card powered by Google AdMob, governed by Google's User Messaging Platform (UMP) consent management.
+            </p>
+        </section>
+
+        <!-- SECTION 01: On-Device Data & SharedPreferences -->
+        <section id="section-local-data" class="policy-section soft-card p-5 sm:p-7 mb-5" data-category="local">
+            <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-[11px] font-bold tracking-[0.12em] text-forest num-tabular">01</span>
+                    <h2 class="text-[11px] font-bold tracking-[0.16em] text-muted uppercase">ON-DEVICE DATA &amp; LOCAL STORAGE</h2>
+                </div>
+                <span class="text-[10px] font-bold tracking-[0.12em] text-muted uppercase">SHAREDPREFERENCES</span>
+            </div>
+
+            <h3 class="font-serif text-2xl sm:text-[28px] text-ink leading-snug mb-3">
+                What is stored on your phone
+            </h3>
+            <p class="text-[13px] leading-relaxed text-muted mb-4">
+                To preserve your timer configuration and daily focus progress across app launches, Pomodoro stores lightweight preferences locally in Android's sandboxed <code class="text-xs font-mono text-ink bg-parchment px-1.5 py-0.5 rounded">SharedPreferences</code> file (<code class="text-xs font-mono text-forest">pomodoro_timer_state</code>). This data never leaves your device to any server owned by us:
+            </p>
+
+            <div class="divide-y divide-border border-t border-b border-border">
+                <div class="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                    <div>
+                        <p class="text-sm font-semibold text-ink">Session Length Preferences</p>
+                        <p class="text-xs text-muted">Your custom durations for Focus (5–60 min), Short Break (5–30 min), and Long Break (10–60 min).</p>
+                    </div>
+                    <span class="self-start sm:self-center text-[10px] font-bold tracking-[0.12em] px-2.5 py-1 rounded-full bg-parchment text-muted uppercase shrink-0">
+                        Local Only
+                    </span>
+                </div>
+
+                <div class="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                    <div>
+                        <p class="text-sm font-semibold text-ink">Today's Rhythm Progress</p>
+                        <p class="text-xs text-muted">Completed focus session count, focused minutes, and current epoch day. Automatically resets to <span class="num-tabular">0</span> at <span class="num-tabular">12:00 AM</span> local time or whenever you tap <strong>RESET TODAY</strong>.</p>
+                    </div>
+                    <span class="self-start sm:self-center text-[10px] font-bold tracking-[0.12em] px-2.5 py-1 rounded-full bg-mint-light text-forest uppercase shrink-0">
+                        Auto-Resets Daily
+                    </span>
+                </div>
+
+                <div class="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                    <div>
+                        <p class="text-sm font-semibold text-ink">Active Countdown State</p>
+                        <p class="text-xs text-muted">Current phase, remaining milliseconds, monotonic elapsed-realtime deadline, and system boot count so running timers recover cleanly if the app is backgrounded.</p>
+                    </div>
+                    <span class="self-start sm:self-center text-[10px] font-bold tracking-[0.12em] px-2.5 py-1 rounded-full bg-parchment text-muted uppercase shrink-0">
+                        Ephemeral
+                    </span>
+                </div>
+
+                <div class="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                    <div>
+                        <p class="text-sm font-semibold text-ink">Alarm &amp; Ringtone Preferences</p>
+                        <p class="text-xs text-muted">Whether the completion alarm and vibration are enabled, ring duration (<span class="num-tabular">10s–60s</span>), and the system URI of your chosen alarm tone.</p>
+                    </div>
+                    <span class="self-start sm:self-center text-[10px] font-bold tracking-[0.12em] px-2.5 py-1 rounded-full bg-parchment text-muted uppercase shrink-0">
+                        Local Only
+                    </span>
+                </div>
+            </div>
+
+            <!-- Android Auto Backup & Device Transfer Note -->
+            <div class="mt-4 p-4 rounded-2xl bg-parchment/70 border border-border">
+                <p class="text-xs font-semibold text-ink flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-forest"></span>
+                    Android Cloud Backup &amp; Device-to-Device Transfer
+                </p>
+                <p class="mt-1 text-xs text-muted leading-relaxed">
+                    In accordance with standard Android conventions (<code class="font-mono text-[11px]">backup_rules.xml</code> and <code class="font-mono text-[11px]">data_extraction_rules.xml</code>), your local <code class="font-mono text-[11px]">sharedpref</code> settings may be backed up by your Android operating system to your personal Google Drive account or transferred when you set up a new phone. If a custom ringtone URI from an older device cannot be resolved after a transfer, the app automatically falls back to your phone's default alarm sound. We have no access to your Google Drive backups.
+                </p>
+            </div>
+        </section>
+
+        <!-- SECTION 02: Advertising & User Consent (AdMob & UMP) -->
+        <section id="section-ads-consent" class="policy-section soft-card p-5 sm:p-7 mb-5" data-category="ads">
+            <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-[11px] font-bold tracking-[0.12em] text-forest num-tabular">02</span>
+                    <h2 class="text-[11px] font-bold tracking-[0.16em] text-muted uppercase">THIRD-PARTY ADVERTISING &amp; CONSENT</h2>
+                </div>
+                <span class="text-[10px] font-bold tracking-[0.12em] text-forest uppercase">ADMOB &amp; UMP SDK</span>
+            </div>
+
+            <h3 class="font-serif text-2xl sm:text-[28px] text-ink leading-snug mb-3">
+                How native ads and privacy choices work
+            </h3>
+            <p class="text-[13px] leading-relaxed text-muted mb-4">
+                To keep Pomodoro free to use without subscriptions or paywalls, the app integrates the <strong>Google Mobile Ads SDK (AdMob)</strong> to display a single native sponsored card within the app layout, paired with the <strong>Google User Messaging Platform (UMP) SDK</strong> to respect your regional privacy rights.
+            </p>
+
+            <!-- Consent First Architecture Highlight -->
+            <div class="p-4 rounded-2xl bg-mint-light/60 border border-mint mb-4">
+                <p class="text-xs font-semibold text-forest uppercase tracking-wider mb-1">
+                    Consent-First Initialization (EEA, UK &amp; Regulated Regions)
+                </p>
+                <p class="text-xs text-ink/90 leading-relaxed">
+                    Before any advertisement is requested, Pomodoro queries your consent status via Google's User Messaging Platform (<code class="font-mono text-[11px]">AdsConsentManager</code>). The Google Mobile Ads SDK is <strong>only initialized after</strong> UMP confirms that consent has been obtained or is not required in your jurisdiction.
+                </p>
+            </div>
+
+            <p class="text-xs font-bold tracking-[0.14em] text-muted uppercase mb-2.5">
+                DATA COLLECTED BY GOOGLE MOBILE ADS SDK
+            </p>
+            <p class="text-[13px] leading-relaxed text-muted mb-3">
+                When ads are active, Google may automatically collect and process the following categories of data on your device to deliver, measure, and prevent fraud in advertisements:
+            </p>
+
+            <ul class="space-y-2.5 text-[13px] text-muted mb-5">
+                <li class="flex items-start gap-2.5">
+                    <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-forest shrink-0"></span>
+                    <span><strong class="text-ink">Device &amp; Advertising Identifiers:</strong> Your resettable Android Advertising ID (<code class="text-xs font-mono">AD_ID</code>), app set ID, and basic device parameters (device make, model, operating system version, screen size, and language).</span>
+                </li>
+                <li class="flex items-start gap-2.5">
+                    <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-forest shrink-0"></span>
+                    <span><strong class="text-ink">IP Address &amp; Approximate Location:</strong> Your device's IP address, which may be used by Google to estimate coarse/approximate geographic location for regional ad relevance, regulatory compliance, and security/fraud prevention. (Pomodoro never requests GPS or precise location permissions.)</span>
+                </li>
+                <li class="flex items-start gap-2.5">
+                    <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-forest shrink-0"></span>
+                    <span><strong class="text-ink">Ad Interactions &amp; Diagnostics:</strong> Information about whether an ad was loaded, viewed (impressions), or tapped, as well as ad load error diagnostics (<code class="text-xs font-mono">LoadAdError</code>) to maintain stability.</span>
+                </li>
+            </ul>
+
+            <!-- How to Manage Privacy Choices Inside the App -->
+            <div class="p-4 rounded-2xl bg-parchment border border-border">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <p class="text-sm font-semibold text-ink">How to change or withdraw your ad consent</p>
+                        <p class="text-xs text-muted mt-0.5 leading-relaxed">
+                            1. <strong>Inside Pomodoro:</strong> Tap the <strong>Alarm Settings</strong> button (clock icon at the top right) and tap <strong>Privacy choices → MANAGE</strong> to reopen the Google UMP consent form at any time.<br>
+                            2. <strong>In Android Settings:</strong> Open <em>Settings → Privacy → Ads</em> (or <em>Settings → Google → Ads</em>) to reset or delete your Advertising ID.
+                        </p>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-stone/60 flex flex-wrap gap-4 text-xs">
+                    <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" class="text-forest font-semibold hover:underline inline-flex items-center gap-1">
+                        Google Privacy Policy
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                    <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer" class="text-forest font-semibold hover:underline inline-flex items-center gap-1">
+                        How Google uses information from apps
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                    <a href="https://support.google.com/admob/answer/9012903" target="_blank" rel="noopener noreferrer" class="text-forest font-semibold hover:underline inline-flex items-center gap-1">
+                        AdMob SDK Data Disclosure
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 03: Android Permissions Explained -->
+        <section id="section-permissions" class="policy-section soft-card p-5 sm:p-7 mb-5" data-category="permissions">
+            <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-[11px] font-bold tracking-[0.12em] text-forest num-tabular">03</span>
+                    <h2 class="text-[11px] font-bold tracking-[0.16em] text-muted uppercase">DEVICE PERMISSIONS &amp; SYSTEM APIS</h2>
+                </div>
+                <span class="text-[10px] font-bold tracking-[0.12em] text-muted uppercase">ANDROIDMANIFEST.XML</span>
+            </div>
+
+            <h3 class="font-serif text-2xl sm:text-[28px] text-ink leading-snug mb-3">
+                Why each permission is requested
+            </h3>
+            <p class="text-[13px] leading-relaxed text-muted mb-4">
+                Pomodoro requests only the minimum Android permissions necessary to keep your countdown accurate in the background, ring your alarm on time, and display the sponsored native ad card:
+            </p>
+
+            <div class="divide-y divide-border border-t border-b border-border">
+                <!-- Permission 1 -->
+                <div class="py-3.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-sm font-semibold text-ink">Post Notifications</span>
+                        <code class="text-[11px] font-mono text-forest bg-mint-light px-2 py-0.5 rounded">POST_NOTIFICATIONS</code>
+                    </div>
+                    <p class="mt-1 text-xs text-muted leading-relaxed">
+                        Requested at runtime on Android 13+ when you start a session. Used exclusively to display the silent live countdown notification (with Pause, Resume, and Reset buttons) and the session completion notification when a focus or break phase ends.
+                    </p>
+                </div>
+
+                <!-- Permission 2 -->
+                <div class="py-3.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-sm font-semibold text-ink">Foreground Timer Service</span>
+                        <code class="text-[11px] font-mono text-forest bg-mint-light px-2 py-0.5 rounded">FOREGROUND_SERVICE_SPECIAL_USE</code>
+                    </div>
+                    <p class="mt-1 text-xs text-muted leading-relaxed">
+                        Allows <code class="font-mono text-[11px]">PomodoroTimerService</code> (subtype <code class="font-mono text-[11px]">pomodoro_timer</code>) to keep your countdown running accurately when you switch apps or lock your screen. As soon as you pause or reset the timer, the foreground service stops immediately.
+                    </p>
+                </div>
+
+                <!-- Permission 3 -->
+                <div class="py-3.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-sm font-semibold text-ink">Wake Lock &amp; Backup Wake-up</span>
+                        <code class="text-[11px] font-mono text-forest bg-mint-light px-2 py-0.5 rounded">WAKE_LOCK</code>
+                    </div>
+                    <p class="mt-1 text-xs text-muted leading-relaxed">
+                        Holds a temporary partial CPU wake lock while a countdown is actively ticking and for the brief duration of the completion alarm (<span class="num-tabular">10–60</span> seconds) so the device does not sleep through the end of your session. When paused or idle, no wake lock is held.
+                    </p>
+                </div>
+
+                <!-- Permission 4 -->
+                <div class="py-3.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-sm font-semibold text-ink">Vibration &amp; Haptics</span>
+                        <code class="text-[11px] font-mono text-forest bg-mint-light px-2 py-0.5 rounded">VIBRATE</code>
+                    </div>
+                    <p class="mt-1 text-xs text-muted leading-relaxed">
+                        Provides subtle tactile feedback on controls and vibrates when a session ends. You can disable alarm vibration at any time inside Alarm Settings.
+                    </p>
+                </div>
+
+                <!-- Permission 5 -->
+                <div class="py-3.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-sm font-semibold text-ink">Internet, Network State &amp; Advertising ID</span>
+                        <code class="text-[11px] font-mono text-forest bg-mint-light px-2 py-0.5 rounded">INTERNET · ACCESS_NETWORK_STATE · AD_ID</code>
+                    </div>
+                    <p class="mt-1 text-xs text-muted leading-relaxed">
+                        Used strictly by the Google User Messaging Platform (UMP) SDK and Google Mobile Ads (AdMob) SDK to check consent requirements and load the native ad card. All core timer, alarm, and daily rhythm features work completely offline.
+                    </p>
+                </div>
+
+                <!-- Permission 6 -->
+                <div class="py-3.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-sm font-semibold text-ink">System Ringtone Picker &amp; Audio Ducking</span>
+                        <code class="text-[11px] font-mono text-muted bg-parchment px-2 py-0.5 rounded">ACTION_RINGTONE_PICKER</code>
+                    </div>
+                    <p class="mt-1 text-xs text-muted leading-relaxed">
+                        When you choose a custom alarm sound, Pomodoro delegates selection to Android's built-in system Ringtone Picker so the app never needs permission to read your personal media or audio files. When the alarm rings, it requests transient audio focus (<code class="font-mono text-[11px]">AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK</code>) to gently lower study music without stopping it.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 04: Google Play Data Safety Matrix -->
+        <section id="section-data-safety" class="policy-section soft-card p-5 sm:p-7 mb-5" data-category="ads permissions">
+            <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-[11px] font-bold tracking-[0.12em] text-forest num-tabular">04</span>
+                    <h2 class="text-[11px] font-bold tracking-[0.16em] text-muted uppercase">GOOGLE PLAY DATA SAFETY DISCLOSURE</h2>
+                </div>
+                <span class="text-[10px] font-bold tracking-[0.12em] text-forest uppercase">TRANSPARENCY SUMMARY</span>
+            </div>
+
+            <h3 class="font-serif text-2xl sm:text-[28px] text-ink leading-snug mb-3">
+                Data Safety summary table
+            </h3>
+            <p class="text-[13px] leading-relaxed text-muted mb-4">
+                In alignment with Google Play Store's Data Safety requirements, the table below summarizes all data handled by the app and its integrated Google AdMob SDK:
+            </p>
+
+            <div class="overflow-x-auto rounded-2xl border border-border">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-parchment text-ink border-b border-border">
+                            <th class="py-3 px-3.5 font-semibold">Data Category</th>
+                            <th class="py-3 px-3.5 font-semibold">Handled By</th>
+                            <th class="py-3 px-3.5 font-semibold">Purpose</th>
+                            <th class="py-3 px-3.5 font-semibold">Encrypted in Transit</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border bg-paper text-muted">
+                        <tr>
+                            <td class="py-3 px-3.5 font-medium text-ink">Timer Settings &amp; Daily Session Counts</td>
+                            <td class="py-3 px-3.5">On-Device Only (Not collected or shared)</td>
+                            <td class="py-3 px-3.5">App functionality</td>
+                            <td class="py-3 px-3.5 text-forest font-medium">Stays on device</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-3.5 font-medium text-ink">Device or Other IDs (Advertising ID)</td>
+                            <td class="py-3 px-3.5">Google Mobile Ads SDK</td>
+                            <td class="py-3 px-3.5">Advertising, analytics &amp; fraud prevention</td>
+                            <td class="py-3 px-3.5 text-forest font-medium">Yes (TLS/HTTPS)</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-3.5 font-medium text-ink">Approximate Location (via IP Address)</td>
+                            <td class="py-3 px-3.5">Google Mobile Ads / UMP SDK</td>
+                            <td class="py-3 px-3.5">Regional consent rules, ad serving &amp; security</td>
+                            <td class="py-3 px-3.5 text-forest font-medium">Yes (TLS/HTTPS)</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-3.5 font-medium text-ink">App Interactions &amp; Diagnostics</td>
+                            <td class="py-3 px-3.5">Google Mobile Ads SDK</td>
+                            <td class="py-3 px-3.5">Ad impression/click measurement &amp; load diagnostics</td>
+                            <td class="py-3 px-3.5 text-forest font-medium">Yes (TLS/HTTPS)</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-3.5 font-medium text-ink">Personal Info (Name, Email, Contacts, Files)</td>
+                            <td class="py-3 px-3.5">Never accessed or collected</td>
+                            <td class="py-3 px-3.5">N/A</td>
+                            <td class="py-3 px-3.5 text-muted-light">N/A</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SECTION 05: Data Retention, Deletion & Regional Privacy Rights -->
+        <section id="section-rights" class="policy-section soft-card p-5 sm:p-7 mb-5" data-category="local ads">
+            <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-[11px] font-bold tracking-[0.12em] text-forest num-tabular">05</span>
+                    <h2 class="text-[11px] font-bold tracking-[0.16em] text-muted uppercase">RETENTION, DELETION &amp; YOUR RIGHTS</h2>
+                </div>
+                <span class="text-[10px] font-bold tracking-[0.12em] text-muted uppercase">GDPR · UK · CCPA · DPDP</span>
+            </div>
+
+            <h3 class="font-serif text-2xl sm:text-[28px] text-ink leading-snug mb-3">
+                Full control over your data
+            </h3>
+
+            <div class="grid sm:grid-cols-2 gap-4 mb-4">
+                <div class="p-4 rounded-2xl bg-parchment/60 border border-border">
+                    <p class="text-xs font-bold tracking-[0.12em] text-forest uppercase mb-1.5">
+                        Resetting Study History
+                    </p>
+                    <p class="text-xs text-muted leading-relaxed">
+                        Pomodoro intentionally does not build long-term behavioral profiles. Your completed session count and focused minutes reset automatically at <strong>12:00 AM midnight</strong> every day, or immediately whenever you tap <strong>RESET TODAY</strong> on the Today's Rhythm card.
+                    </p>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-parchment/60 border border-border">
+                    <p class="text-xs font-bold tracking-[0.12em] text-forest uppercase mb-1.5">
+                        Complete Erasure
+                    </p>
+                    <p class="text-xs text-muted leading-relaxed">
+                        You can permanently erase all local preferences, custom session lengths, alarm settings, and cached consent states at any time by clearing the app's storage in <em>Android Settings → Apps → Pomodoro → Storage &amp; cache → Clear storage</em>, or by uninstalling the app.
+                    </p>
+                </div>
+            </div>
+
+            <div class="space-y-3 text-[13px] leading-relaxed text-muted">
+                <p>
+                    <strong class="text-ink">EEA, UK &amp; Swiss Users (GDPR):</strong> Where the Google Mobile Ads SDK processes device identifiers or IP addresses, legal bases include your explicit consent (collected via the Google UMP consent form) and legitimate interests for basic fraud prevention and security. You may withdraw consent at any time via <em>Alarm Settings → Privacy choices</em>.
+                </p>
+                <p>
+                    <strong class="text-ink">California &amp; US State Privacy Laws (CCPA / CPRA / VCDPA):</strong> We do not sell your personal information in the traditional sense. To opt out of cross-context behavioral advertising by third-party ad networks, you can manage your preferences in the app's privacy options or enable "Delete advertising ID" / "Opt out of Ads Personalization" in your Android system settings.
+                </p>
+                <p>
+                    <strong class="text-ink">Children's Privacy:</strong> Pomodoro is a general-audience productivity timer and is not directed at children under the age of 13 (or the minimum age of digital consent in your jurisdiction). We do not knowingly collect personal data from children.
+                </p>
+            </div>
+        </section>
+
+        <!-- SECTION 06: Changes & Contact Information -->
+        <section id="section-contact" class="policy-section soft-card p-5 sm:p-7 mb-8" data-category="all local ads permissions">
+            <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-[11px] font-bold tracking-[0.12em] text-forest num-tabular">06</span>
+                    <h2 class="text-[11px] font-bold tracking-[0.16em] text-muted uppercase">POLICY UPDATES &amp; CONTACT</h2>
+                </div>
+                <span class="text-[10px] font-bold tracking-[0.12em] text-forest uppercase">QUESTIONS &amp; SUPPORT</span>
+            </div>
+
+            <h3 class="font-serif text-2xl sm:text-[28px] text-ink leading-snug mb-3">
+                Get in touch
+            </h3>
+            <p class="text-[13px] leading-relaxed text-muted mb-5">
+                We may update this Privacy Policy from time to time to reflect improvements to Pomodoro or changes in legal or Play Store requirements. Any updates will be published on this page with a revised effective date. If you have any questions or privacy requests regarding <strong class="text-ink">Pomodoro</strong> (<code class="text-xs font-mono text-forest">com.studyapp.pomodoro</code>), please reach out:
+            </p>
+
+            <div class="p-4 sm:p-5 rounded-2xl bg-parchment border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="space-y-1">
+                    <p class="text-xs text-muted uppercase tracking-wider font-semibold">Developer / Data Controller</p>
+                    <p class="text-base font-serif font-medium text-ink dev-name-text">Noxterus</p>
+                    <p class="text-xs text-muted">
+                        Email: <a id="contact-email-link" href="mailto:privacy@studyapp-pomodoro.com" class="text-forest font-medium hover:underline">privacy@studyapp-pomodoro.com</a>
+                    </p>
+                </div>
+
+                <div class="no-print flex flex-wrap items-center gap-2.5">
+                    <a id="contact-cta-btn" href="mailto:privacy%40studyapp-pomodoro.com?subject=Pomodoro%20Privacy%20Inquiry%20(com.studyapp.pomodoro)" class="soft-btn-primary px-5 py-2.5 text-sm font-serif font-medium inline-flex items-center gap-2">
+                        <span>Email Privacy Support</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- App-Style Footer (Replicating Footer() in PomodoroScreen.kt) -->
+        <footer class="pt-2 pb-8 text-center">
+            <div class="flex items-center justify-center gap-3">
+                <div class="w-7 h-[1px] bg-stone"></div>
+                <p class="text-[11px] font-bold tracking-[0.2em] text-muted uppercase">
+                    A SOFTER STUDY RHYTHM
+                </p>
+                <div class="w-7 h-[1px] bg-stone"></div>
+            </div>
+            <p class="mt-3 text-[11px] text-muted-light">
+                © <span class="num-tabular">2026</span> <span class="dev-name-text">Noxterus</span> · Pomodoro (<code class="font-mono">com.studyapp.pomodoro</code>)
+            </p>
+        </footer>
+    </main>
+
+    <!-- GitHub Pages Customizer Modal (Replicating AlarmSettingsDialog.kt style so the developer can customize their email/name & copy/download HTML) -->
+    <div id="config-modal" class="no-print fixed inset-0 z-50 items-center justify-center bg-ink/30 backdrop-blur-[2px] p-4 hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="soft-card w-full max-w-md p-5 sm:p-6 animate-fade-in">
+            <!-- Modal Heading matching AlarmDialogHeading() -->
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-2xl bg-mint flex items-center justify-center text-forest shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold tracking-[0.16em] text-forest uppercase">GITHUB PAGES SETUP</p>
+                        <h2 id="modal-title" class="font-serif text-2xl sm:text-3xl text-ink leading-none mt-0.5">
+                            Developer details
+                        </h2>
+                    </div>
+                </div>
+                <button type="button" onclick="toggleConfigModal()" aria-label="Close settings" class="soft-icon-btn w-10 h-10 flex items-center justify-center text-muted">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <p class="mt-3 text-xs text-muted leading-relaxed">
+                Customize your developer name, contact email, and effective date below. You can preview changes live or download the updated <code class="font-mono text-forest">index.html</code> ready to commit to your GitHub Pages repository.
+            </p>
+
+            <hr class="my-4 border-border">
+
+            <div class="space-y-3.5">
+                <div>
+                    <label for="input-dev-name" class="block text-xs font-semibold text-ink mb-1">
+                        Developer or Studio Name
+                    </label>
+                    <input id="input-dev-name" type="text" value="Noxterus" placeholder="e.g. Your Name or Studio" class="w-full px-3.5 py-2.5 rounded-xl bg-parchment border border-border text-sm text-ink focus:outline-none focus:border-forest" __gcruniqueid="1">
+                </div>
+
+                <div>
+                    <label for="input-dev-email" class="block text-xs font-semibold text-ink mb-1">
+                        Privacy Contact Email
+                    </label>
+                    <input id="input-dev-email" type="email" value="privacy@studyapp-pomodoro.com" placeholder="e.g. you@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-parchment border border-border text-sm text-ink focus:outline-none focus:border-forest" __gcruniqueid="2">
+                </div>
+
+                <div>
+                    <label for="input-effective-date" class="block text-xs font-semibold text-ink mb-1">
+                        Effective Date
+                    </label>
+                    <input id="input-effective-date" type="text" value="October 25, 2026" class="w-full px-3.5 py-2.5 rounded-xl bg-parchment border border-border text-sm text-ink focus:outline-none focus:border-forest" __gcruniqueid="3">
+                </div>
+            </div>
+
+            <!-- Status Toast Inside Modal -->
+            <div id="modal-status" class="mt-3 px-3 py-2 rounded-xl bg-mint-light text-forest text-xs font-medium text-center">Downloading updated index.html...</div>
+
+            <div class="mt-5 space-y-2.5">
+                <button type="button" onclick="applyCustomizations(false)" class="soft-btn-primary w-full py-3 text-base font-serif font-medium">
+                    Apply to Page
+                </button>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <button type="button" onclick="applyCustomizations(true)" class="soft-btn-secondary py-2.5 px-3 text-xs font-semibold text-ink flex items-center justify-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-forest" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        Download index.html
+                    </button>
+                    <button type="button" onclick="copyUpdatedHtml()" class="soft-btn-secondary py-2.5 px-3 text-xs font-semibold text-ink flex items-center justify-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-forest" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                        Copy HTML
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Filters policy cards using the ModeTabs-inspired segmented bar.
+         */
+        function filterSections(category) {
+            const tabs = ['all', 'local', 'ads', 'permissions'];
+            tabs.forEach(tabId => {
+                const btn = document.getElementById('tab-' + tabId);
+                if (!btn) return;
+                if (tabId === category) {
+                    btn.className = 'mode-tab min-h-[44px] px-3 py-2 rounded-[20px] text-xs font-medium transition-all bg-forest text-ivory shadow-sm';
+                } else {
+                    btn.className = 'mode-tab min-h-[44px] px-3 py-2 rounded-[20px] text-xs font-normal transition-all text-muted hover:text-ink';
+                }
+            });
+
+            const sections = document.querySelectorAll('.policy-section');
+            sections.forEach(sec => {
+                const cats = (sec.getAttribute('data-category') || '').split(' ');
+                if (category === 'all' || cats.includes(category)) {
+                    sec.classList.remove('hidden');
+                } else {
+                    sec.classList.add('hidden');
+                }
+            });
+        }
+
+        /**
+         * Opens or closes the GitHub Pages developer customization modal.
+         */
+        function toggleConfigModal() {
+            const modal = document.getElementById('config-modal');
+            if (!modal) return;
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        /**
+         * Applies developer name, email, and effective date to the DOM,
+         * and optionally triggers a download of the updated single-file index.html.
+         */
+        function applyCustomizations(downloadFile) {
+            const devName = document.getElementById('input-dev-name').value.trim() || 'Study / Rhythm';
+            const devEmail = document.getElementById('input-dev-email').value.trim() || 'privacy@studyapp-pomodoro.com';
+            const effDate = document.getElementById('input-effective-date').value.trim() || 'October 25, 2026';
+
+            // Update developer name spans
+            document.querySelectorAll('.dev-name-text').forEach(el => {
+                el.textContent = devName;
+            });
+
+            // Update email links
+            const emailLink = document.getElementById('contact-email-link');
+            if (emailLink) {
+                emailLink.textContent = devEmail;
+                emailLink.setAttribute('href', 'mailto:' + devEmail);
+            }
+
+            const ctaBtn = document.getElementById('contact-cta-btn');
+            if (ctaBtn) {
+                ctaBtn.setAttribute(
+                    'href',
+                    'mailto:' + encodeURIComponent(devEmail) + '?subject=Pomodoro%20Privacy%20Inquiry%20(com.studyapp.pomodoro)'
+                );
+            }
+
+            // Update effective date
+            const dateEl = document.getElementById('display-effective-date');
+            if (dateEl) {
+                dateEl.textContent = effDate;
+            }
+
+            // Sync input default value attributes so exported HTML retains them
+            document.getElementById('input-dev-name').setAttribute('value', devName);
+            document.getElementById('input-dev-email').setAttribute('value', devEmail);
+            document.getElementById('input-effective-date').setAttribute('value', effDate);
+
+            showModalStatus(downloadFile ? 'Downloading updated index.html...' : 'Applied to page!');
+
+            if (downloadFile) {
+                const modal = document.getElementById('config-modal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+
+                const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+                const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'index.html';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        /**
+         * Copies the updated HTML source to the clipboard for pasting into GitHub.
+         */
+        function copyUpdatedHtml() {
+            applyCustomizations(false);
+            const modal = document.getElementById('config-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+
+            const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+
+            // Re-open modal to show confirmation
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            const textarea = document.createElement('textarea');
+            textarea.value = fullHtml;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showModalStatus('Copied full index.html to clipboard!');
+            } catch (err) {
+                showModalStatus('Unable to copy automatically — use Download index.html instead.');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function showModalStatus(msg) {
+            const status = document.getElementById('modal-status');
+            if (!status) return;
+            status.textContent = msg;
+            status.classList.remove('hidden');
+            setTimeout(() => {
+                status.classList.add('hidden');
+            }, 3200);
+        }
+
+        // Also support URL query parameters (?name=...&email=...) for instant GitHub Pages customization
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const nameParam = params.get('name');
+            const emailParam = params.get('email');
+            const dateParam = params.get('date');
+
+            if (nameParam) document.getElementById('input-dev-name').value = nameParam;
+            if (emailParam) document.getElementById('input-dev-email').value = emailParam;
+            if (dateParam) document.getElementById('input-effective-date').value = dateParam;
+
+            if (nameParam || emailParam || dateParam) {
+                applyCustomizations(false);
+            }
+        });
+    </script>
+
+</body></html>
