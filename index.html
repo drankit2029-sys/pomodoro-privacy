@@ -257,7 +257,7 @@
             Pomodoro is a distraction-free study timer, 30-day &amp; 365-day rhythm ledger, subject tracker, and ambient focus studio for Android. Every feature of the application — including Flow Overtime, the 365-Day Archive, CSV Ledger Export, Custom Study Subjects, Unlimited Daily Tasks, Procedural Ambient Soundscapes, and Focus Mode — is unlocked for all users at no monetary cost.
           </p>
           <p>
-            To fund development without subscriptions or paywalls, Pomodoro operates on an <strong>exclusive advertising model</strong> powered by <strong>Google AdMob</strong> and the <strong>Google User Messaging Platform (UMP)</strong>. We do not operate proprietary backend servers, do not require or offer user accounts, and never transmit your personal study logs off your device.
+            To fund development without subscriptions or paywalls, Pomodoro operates on an <strong>exclusive advertising model</strong> powered by <strong>Google AdMob</strong> and the <strong>Google User Messaging Platform (UMP)</strong>. We do not operate proprietary backend servers or require user accounts.
           </p>
         </div>
       </article>
@@ -333,7 +333,7 @@
             </h2>
           </div>
           <span class="px-3 py-1 rounded-full bg-mintLight border border-forest/30 text-forest text-[11px] font-semibold shrink-0">
-            Modern TLS Cryptography
+            Data Safety Disclosed
           </span>
         </div>
         <div class="h-[1px] bg-borderWarm my-4"></div>
@@ -393,12 +393,9 @@
           </table>
         </div>
 
-        <div class="parchment-well p-4 mt-4 space-y-2 text-xs text-muted">
-          <div class="font-semibold text-ink uppercase tracking-wider">Secure Data Handling Procedures</div>
+        <div class="parchment-well p-4 mt-4 text-xs text-muted">
           <p class="leading-relaxed">
-            <strong>1. Encryption in Transit:</strong> All network communications between Pomodoro's embedded Google Mobile Ads / UMP SDKs and Google servers are transmitted exclusively over encrypted channels using modern cryptography (HTTPS / TLS 1.2+). Cleartext HTTP traffic is disabled.<br />
-            <strong>2. Strict Sandbox Isolation:</strong> All study records, tasks, and preferences remain inside Android's kernel-enforced private application storage directory and cannot be read by other installed applications.<br />
-            <strong>3. No Sale of Personal Data:</strong> We do not sell personal or sensitive user data to data brokers or third parties.
+            <strong class="text-ink">No Sale of Personal Data:</strong> We do not sell personal or sensitive user data to data brokers or third parties.
           </p>
         </div>
       </article>
@@ -447,7 +444,7 @@
               Third-Party Privacy Policies &amp; Partner Disclosures
             </h3>
             <p class="text-xs text-muted mb-3">
-              Google and its certified ad technology providers may use cookies, mobile identifiers (<code class="text-ink">AD_ID</code>), and local storage to serve and measure ads in accordance with their respective privacy policies. You can inspect the full list of ad technology providers directly inside the in-app UMP consent form (<strong>Alarm Settings → Privacy choices</strong>) and review Google's official disclosures below:
+              You can inspect the full list of ad technology providers directly inside the in-app UMP consent form (<strong>Alarm Settings → Privacy choices</strong>) and review Google's official disclosures below:
             </p>
             <div class="flex flex-wrap gap-3 text-xs">
               <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" class="text-forest font-semibold underline hover:text-forestDeep">
@@ -474,7 +471,7 @@
             </h2>
           </div>
           <span class="px-3 py-1 rounded-full bg-forest text-ivory text-[11px] font-semibold shrink-0">
-            isAccessibilityTool="false"
+            Optional Focus Mode
           </span>
         </div>
         <div class="h-[1px] bg-borderWarm my-4"></div>
@@ -488,7 +485,7 @@
             <div class="parchment-well p-4">
               <div class="eyebrow text-forest mb-1">1. WHY THE API IS USED &amp; NON-DISABILITY DESIGNATION</div>
               <p class="text-xs text-muted leading-relaxed">
-                Pomodoro is a study productivity timer, <strong>not</strong> a disability assistance tool, and explicitly declares <code class="text-ink">android:isAccessibilityTool="false"</code> in <code class="text-ink">res/xml/accessibility_focus_lock.xml</code>. The AccessibilityService API is used solely for optional, user-initiated <strong>Focus Mode</strong>, <strong>Auto Focus</strong>, and <strong>Advanced Focus</strong> sessions to prevent accidental distraction by keeping Pomodoro in the foreground while your study timer is active.
+                Pomodoro is a study productivity timer, <strong>not</strong> a disability assistance tool, and explicitly declares <code class="text-ink">android:isAccessibilityTool="false"</code> in <code class="text-ink">res/xml/accessibility_focus_lock.xml</code>. The AccessibilityService API is used solely for user-initiated <strong>Focus Mode</strong>, <strong>Auto Focus</strong>, and <strong>Advanced Focus</strong> sessions to prevent accidental distraction by keeping Pomodoro in the foreground while your study timer is active.
               </p>
             </div>
 
@@ -614,8 +611,8 @@
           <div class="parchment-well p-4">
             <h3 class="font-semibold text-ink uppercase tracking-wider text-xs mb-1.5">Data Retention Schedule</h3>
             <ul class="space-y-1.5 text-xs text-muted">
-              <li>• <strong class="text-ink">On-Device Study History &amp; Tasks:</strong> Daily rhythm records and daily task lists are retained locally on your device for a rolling window of up to <strong>365 days</strong> (<code class="text-ink">HISTORY_WINDOW_DAYS_YEAR = 365</code>), after which entries older than 365 days are automatically pruned on-device during the midnight daily reset.</li>
-              <li>• <strong class="text-ink">No Developer Server Retention:</strong> Because Nexdert does not collect or store your data on external servers, our server-side retention period is <strong>zero days</strong>.</li>
+              <li>• <strong class="text-ink">On-Device Study History &amp; Tasks:</strong> Daily rhythm records and daily task lists are retained locally on your device for a rolling window of up to <strong>365 days</strong> (<code class="text-ink">HISTORY_WINDOW_DAYS_YEAR = 365</code>).</li>
+              <li>• <strong class="text-ink">No Developer Server Retention:</strong> We do not store data on external servers, so our server-side retention period is <strong>zero days</strong>.</li>
               <li>• <strong class="text-ink">No User Accounts (<a href="https://support.google.com/googleplay/android-developer/answer/13327111?hl=en" target="_blank" rel="noopener noreferrer" class="text-forest underline">Google Play Account Deletion Policy</a>):</strong> Pomodoro does not support or require account creation, login credentials, or cloud profiles; therefore, no server-side account exists to freeze or delete.</li>
               <li>• <strong class="text-ink">Third-Party Advertising Data:</strong> Data processed by Google AdMob is retained and governed by <a href="https://policies.google.com/technologies/retention" target="_blank" rel="noopener noreferrer" class="text-forest font-semibold underline">Google's Data Retention Policies</a>.</li>
             </ul>
@@ -653,11 +650,11 @@
         </div>
       </article>
 
-      <!-- SECTION 8: Children's Privacy, Policy Updates & Contact -->
+      <!-- SECTION 8: Children's Privacy & Policy Updates -->
       <article class="soft-card p-6 sm:p-8 policy-section" data-category="rights">
-        <span class="eyebrow text-forest">08 · CHILDREN'S PRIVACY, UPDATES &amp; PRIVACY POINT OF CONTACT</span>
+        <span class="eyebrow text-forest">08 · CHILDREN'S PRIVACY &amp; POLICY UPDATES</span>
         <h2 class="font-cormorant text-2xl sm:text-3xl font-medium text-ink mt-1 break-words">
-          Additional Legal Disclosures &amp; Contact Mechanism
+          Additional Legal Disclosures
         </h2>
         <div class="h-[1px] bg-borderWarm my-4"></div>
         <div class="space-y-3 text-xs sm:text-[13.5px] leading-relaxed text-muted">
@@ -666,9 +663,6 @@
           </p>
           <p>
             <strong class="text-ink">Changes to This Privacy Policy:</strong> Whenever we update our features, permissions, or advertising integrations, we will revise the "Effective" date at the top of this page (October 30, 2026) and update the in-app Privacy Policy dialog accordingly.
-          </p>
-          <p>
-            <strong class="text-ink">Developer &amp; Privacy Point of Contact:</strong> If you have questions or requests regarding this Privacy Policy or data handling in <code class="text-ink">com.studyapp.pomodoro</code>, please contact <strong>Nexdert</strong> at <a href="mailto:noxedus2008@gmail.com" class="text-forest font-semibold underline">noxedus2008@gmail.com</a>.
           </p>
         </div>
       </article>
