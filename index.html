@@ -47,6 +47,16 @@
       background-color: #FAF9F4;
       color: #1F2B23;
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+    body {
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+    code {
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
     .font-cormorant {
       font-family: 'Cormorant Garamond', Georgia, serif;
@@ -56,6 +66,7 @@
       font-weight: 700;
       letter-spacing: 0.14em;
       text-transform: uppercase;
+      overflow-wrap: anywhere;
     }
     .soft-card {
       background-color: #FDFBF6;
@@ -97,7 +108,7 @@
   </div>
 
   <!-- Toast Notification -->
-  <div id="toastBanner" class="fixed bottom-5 right-5 z-50 hidden items-center gap-2.5 bg-forest text-ivory px-4 py-3 rounded-full shadow-forestPill text-xs font-medium transition-all duration-200 no-print" role="status" aria-live="polite">
+  <div id="toastBanner" class="fixed bottom-5 right-5 z-50 hidden max-w-[calc(100vw-2.5rem)] sm:max-w-sm items-center gap-2.5 bg-forest text-ivory px-4 py-3 rounded-2xl sm:rounded-full shadow-forestPill text-xs font-medium text-left transition-all duration-200 no-print" role="status" aria-live="polite">
     <span class="w-2 h-2 rounded-full bg-mint inline-block"></span>
     <span id="toastMessage">Copied to clipboard</span>
   </div>
@@ -107,12 +118,12 @@
     <!-- App Header (matches Header composable in PomodoroScreen.kt) -->
     <header class="mb-7">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-mintLight border border-forest/30 mb-3">
-            <span class="w-2 h-2 rounded-full bg-forest"></span>
+        <div class="min-w-0">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-mintLight border border-forest/30 mb-3 max-w-full">
+            <span class="w-2 h-2 rounded-full bg-forest shrink-0"></span>
             <span class="eyebrow text-forest">CALM / SYSTEM · PRIVACY SANCTUARY</span>
           </div>
-          <h1 class="font-cormorant text-4xl sm:text-5xl lg:text-[54px] font-normal text-ink leading-tight tracking-tight">
+          <h1 class="font-cormorant text-4xl sm:text-5xl lg:text-[54px] font-normal text-ink leading-tight tracking-tight break-words">
             Pomodoro Privacy Policy
           </h1>
           <p class="text-muted text-sm sm:text-base mt-1">
@@ -121,12 +132,12 @@
         </div>
 
         <!-- Read-Only Action Pills -->
-        <div class="flex flex-wrap items-center gap-2.5 no-print">
-          <button id="btnCopySummary" type="button" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-paper border border-borderWarm shadow-pill text-ink hover:bg-parchment transition text-xs font-semibold tracking-wide">
+        <div class="flex flex-wrap items-center gap-1.5 no-print">
+          <button id="btnCopySummary" type="button" class="inline-flex items-center gap-2 px-2.5 py-2.5 rounded-full bg-paper border border-borderWarm shadow-pill text-ink hover:bg-parchment transition text-xs font-semibold tracking-wide">
             <svg class="w-3.5 h-3.5 text-forest" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             <span>Copy Policy Text</span>
           </button>
-          <button id="btnPrintPolicy" type="button" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-forest text-ivory shadow-forestPill hover:bg-forestDeep transition text-xs font-semibold tracking-wide">
+          <button id="btnPrintPolicy" type="button" class="inline-flex items-center gap-2 px-2.5 py-2.5 rounded-full bg-forest text-ivory shadow-forestPill hover:bg-forestDeep transition text-xs font-semibold tracking-wide">
             <svg class="w-3.5 h-3.5 text-mint" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             <span>Print Policy</span>
           </button>
@@ -138,14 +149,14 @@
 
     <!-- Top Metadata & At-a-Glance Rhythm Card -->
     <section class="soft-card p-5 sm:p-7 mb-7" aria-label="Privacy At a Glance">
-      <div class="flex flex-wrap items-center justify-between gap-2 mb-5">
+      <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-2 mb-5">
         <span class="eyebrow text-muted">AT-A-GLANCE PRIVACY &amp; COMPLIANCE LEDGER</span>
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2 min-w-0">
           <span class="px-3 py-1 rounded-full bg-parchment border border-borderWarm text-[11px] font-medium text-ink">
             Developer: <strong class="font-semibold text-forest">Nexdert</strong>
           </span>
-          <span class="px-3 py-1 rounded-full bg-parchment border border-borderWarm text-[11px] font-medium text-ink">
-            Contact: <a href="mailto:noxedus2008@gmail.com" class="font-semibold text-forest underline">noxedus2008@gmail.com</a>
+          <span class="px-3 py-1 rounded-full bg-parchment border border-borderWarm text-[11px] font-medium text-ink max-w-full">
+            Contact: <a href="mailto:noxedus2008@gmail.com" class="font-semibold text-forest underline break-all">noxedus2008@gmail.com</a>
           </span>
           <span class="px-3 py-1 rounded-full bg-mintLight border border-forest/25 text-[11px] font-semibold text-forest">
             Effective: October 30, 2026
@@ -154,32 +165,32 @@
       </div>
 
       <!-- 4 Key Metric Blocks (styled like StatBlock in RhythmCard) -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 py-3 border-y border-borderWarm">
-        <div class="text-center px-2 py-1">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 py-3 border-y border-borderWarm">
+        <div class="text-center px-2 py-1 min-w-0">
           <div class="font-cormorant text-3xl sm:text-4xl font-normal text-ink">100%</div>
           <div class="eyebrow text-muted mt-1">ON-DEVICE STUDY DATA</div>
           <p class="text-[11px] text-muted mt-1">Sessions, tasks &amp; 365d ledger stay in private storage</p>
         </div>
-        <div class="text-center px-2 py-1 border-l border-borderWarm">
+        <div class="text-center px-2 py-1 min-w-0 border-t sm:border-t-0 sm:border-l border-borderWarm">
           <div class="font-cormorant text-3xl sm:text-4xl font-normal text-ink">HTTPS / TLS</div>
           <div class="eyebrow text-muted mt-1">ENCRYPTED IN TRANSIT</div>
           <p class="text-[11px] text-muted mt-1">All Google AdMob &amp; UMP SDK traffic uses TLS cryptography</p>
         </div>
-        <div class="text-center px-2 py-1 lg:border-l border-borderWarm">
+        <div class="text-center px-2 py-1 min-w-0 border-t lg:border-t-0 lg:border-l border-borderWarm">
           <div class="font-cormorant text-3xl sm:text-4xl font-normal text-ink">Zero</div>
           <div class="eyebrow text-muted mt-1">SCREEN CONTENT READS</div>
           <p class="text-[11px] text-muted mt-1"><code>canRetrieveWindowContent="false"</code> &amp; <code>isAccessibilityTool="false"</code></p>
         </div>
-        <div class="text-center px-2 py-1 border-l border-borderWarm">
-          <div class="font-cormorant text-3xl sm:text-4xl font-normal text-forest">Ad-Supported</div>
+        <div class="text-center px-2 py-1 min-w-0 border-t sm:border-l lg:border-t-0 border-borderWarm">
+          <div class="font-cormorant text-3xl sm:text-4xl font-normal text-forest break-words">Ad-Supported</div>
           <div class="eyebrow text-muted mt-1">EXCLUSIVE ADS MODEL</div>
           <p class="text-[11px] text-muted mt-1">Google AdMob + IAB TCF / UMP consent controls</p>
         </div>
       </div>
 
       <!-- Search & Filter Bar -->
-      <div class="mt-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 no-print">
-        <div class="relative flex-1">
+      <div class="mt-5 flex flex-col items-stretch gap-3 no-print">
+        <div class="relative w-full min-w-0">
           <input
             id="policySearchInput"
             type="text"
@@ -192,20 +203,20 @@
           </svg>
         </div>
 
-        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0" role="tablist" aria-label="Section category filter">
-          <button type="button" data-filter="all" class="filter-chip px-3.5 py-1.5 rounded-full text-xs font-semibold bg-forest text-ivory border border-forest transition whitespace-nowrap">
+        <div class="flex items-center gap-1.5 overflow-x-auto w-full min-w-0 pb-1 -mx-1 px-1" role="tablist" aria-label="Section category filter">
+          <button type="button" data-filter="all" class="filter-chip shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-forest text-ivory border border-forest transition whitespace-nowrap">
             All Sections (8)
           </button>
-          <button type="button" data-filter="datasafety" class="filter-chip px-3.5 py-1.5 rounded-full text-xs font-medium bg-parchment text-ink border border-borderWarm hover:border-stone transition whitespace-nowrap">
+          <button type="button" data-filter="datasafety" class="filter-chip shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium bg-parchment text-ink border border-borderWarm hover:border-stone transition whitespace-nowrap">
             Data Safety &amp; Security
           </button>
-          <button type="button" data-filter="ads" class="filter-chip px-3.5 py-1.5 rounded-full text-xs font-medium bg-parchment text-ink border border-borderWarm hover:border-stone transition whitespace-nowrap">
+          <button type="button" data-filter="ads" class="filter-chip shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium bg-parchment text-ink border border-borderWarm hover:border-stone transition whitespace-nowrap">
             Ads &amp; EU Consent
           </button>
-          <button type="button" data-filter="permissions" class="filter-chip px-3.5 py-1.5 rounded-full text-xs font-medium bg-parchment text-ink border border-borderWarm hover:border-stone transition whitespace-nowrap">
+          <button type="button" data-filter="permissions" class="filter-chip shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium bg-parchment text-ink border border-borderWarm hover:border-stone transition whitespace-nowrap">
             Accessibility &amp; Permissions
           </button>
-          <button type="button" data-filter="rights" class="filter-chip px-3.5 py-1.5 rounded-full text-xs font-medium bg-parchment text-ink border border-borderWarm hover:border-stone transition whitespace-nowrap">
+          <button type="button" data-filter="rights" class="filter-chip shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium bg-parchment text-ink border border-borderWarm hover:border-stone transition whitespace-nowrap">
             Retention &amp; Deletion
           </button>
         </div>
@@ -226,10 +237,10 @@
 
       <!-- SECTION 1: Developer Identity, Point of Contact & Scope -->
       <article class="soft-card p-6 sm:p-8 policy-section" data-category="datasafety">
-        <div class="flex items-start justify-between gap-4">
-          <div>
+        <div class="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
+          <div class="min-w-0 sm:flex-1">
             <span class="eyebrow text-forest">01 · DEVELOPER IDENTITY, POINT OF CONTACT &amp; SCOPE</span>
-            <h2 class="font-cormorant text-2xl sm:text-3xl font-medium text-ink mt-1">
+            <h2 class="font-cormorant text-2xl sm:text-3xl font-medium text-ink mt-1 break-words">
               Data Controller Information &amp; Local-First Sanctuary Architecture
             </h2>
           </div>
@@ -253,10 +264,10 @@
 
       <!-- SECTION 2: On-Device Data We Store Locally -->
       <article class="soft-card p-6 sm:p-8 policy-section" data-category="datasafety">
-        <div class="flex items-start justify-between gap-4">
-          <div>
+        <div class="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
+          <div class="min-w-0 sm:flex-1">
             <span class="eyebrow text-forest">02 · ON-DEVICE STUDY LEDGER &amp; LOCAL STORAGE</span>
-            <h2 class="font-cormorant text-2xl sm:text-3xl font-medium text-ink mt-1">
+            <h2 class="font-cormorant text-2xl sm:text-3xl font-medium text-ink mt-1 break-words">
               Information Stored Locally on Your Device (Never Shared)
             </h2>
           </div>
@@ -314,10 +325,10 @@
 
       <!-- SECTION 3: Google Play Data Safety Section & Security Practices -->
       <article class="soft-card p-6 sm:p-8 policy-section" data-category="datasafety">
-        <div class="flex flex-wrap items-start justify-between gap-4">
-          <div>
+        <div class="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
+          <div class="min-w-0 sm:flex-1">
             <span class="eyebrow text-forest">03 · DATA COLLECTION, SHARING &amp; SECURITY DISCLOSURE</span>
-            <h2 class="font-cormorant text-2xl sm:text-3xl font-medium text-ink mt-1">
+            <h2 class="font-cormorant text-2xl sm:text-3xl font-medium text-ink mt-1 break-words">
               Personal &amp; Sensitive Data Collected, Shared, and Encrypted in Transit
             </h2>
           </div>
@@ -332,7 +343,7 @@
         </p>
 
         <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse text-xs">
+          <table class="w-full min-w-[680px] text-left border-collapse text-xs">
             <thead>
               <tr class="border-b border-borderWarm text-muted eyebrow">
                 <th class="py-2.5 pr-3">Data Category</th>
@@ -394,10 +405,10 @@
 
       <!-- SECTION 4: Advertising, Google AdMob & EU User Consent Policy -->
       <article class="soft-card p-6 sm:p-8 policy-section" data-category="ads">
-        <div class="flex items-start justify-between gap-4">
-          <div>
+        <div class="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
+          <div class="min-w-0 sm:flex-1">
             <span class="eyebrow text-forest">04 · EXCLUSIVE ADVERTISING &amp; EU USER CONSENT POLICY</span>
-            <h2 class="font-cormorant text-2xl sm:text-3xl font-medium text-ink mt-1">
+            <h2 class="font-cormorant text-2xl sm:text-3xl font-medium text-ink mt-1 break-words">
               Ad Placements, UMP Consent Management &amp; Legal Basis (GDPR / UK / CCPA)
             </h2>
           </div>
@@ -455,10 +466,10 @@
 
       <!-- SECTION 5: Prominent Accessibility Service Disclosure -->
       <article class="soft-card p-6 sm:p-8 policy-section border-2 border-forest/25" data-category="permissions">
-        <div class="flex flex-wrap items-start justify-between gap-4">
-          <div>
+        <div class="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
+          <div class="min-w-0 sm:flex-1">
             <span class="eyebrow text-forest">05 · PROMINENT DISCLOSURE · ANDROID ACCESSIBILITYSERVICE API</span>
-            <h2 class="font-cormorant text-2xl sm:text-3xl font-medium text-ink mt-1">
+            <h2 class="font-cormorant text-2xl sm:text-3xl font-medium text-ink mt-1 break-words">
               Focus Mode App-Exit Blocking (<code class="text-xl sm:text-2xl">FocusLockAccessibilityService</code>)
             </h2>
           </div>
@@ -507,10 +518,10 @@
 
       <!-- SECTION 6: Complete Android Permissions Reference Table -->
       <article class="soft-card p-6 sm:p-8 policy-section" data-category="permissions">
-        <div class="flex items-start justify-between gap-4">
-          <div>
+        <div class="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
+          <div class="min-w-0 sm:flex-1">
             <span class="eyebrow text-forest">06 · SYSTEM PERMISSIONS &amp; HARDWARE ACCESS</span>
-            <h2 class="font-cormorant text-2xl sm:text-3xl font-medium text-ink mt-1">
+            <h2 class="font-cormorant text-2xl sm:text-3xl font-medium text-ink mt-1 break-words">
               Every Permission Declared in <code class="text-xl sm:text-2xl">AndroidManifest.xml</code>
             </h2>
           </div>
@@ -521,7 +532,7 @@
         <div class="h-[1px] bg-borderWarm my-4"></div>
 
         <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse text-xs">
+          <table class="w-full min-w-[680px] text-left border-collapse text-xs">
             <thead>
               <tr class="border-b border-borderWarm text-muted eyebrow">
                 <th class="py-2.5 pr-4">Permission / Service</th>
@@ -586,10 +597,10 @@
 
       <!-- SECTION 7: Data Retention, Deletion Policy & Account Deletion Statement -->
       <article class="soft-card p-6 sm:p-8 policy-section" data-category="rights">
-        <div class="flex items-start justify-between gap-4">
-          <div>
+        <div class="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
+          <div class="min-w-0 sm:flex-1">
             <span class="eyebrow text-forest">07 · DATA RETENTION, DELETION POLICY &amp; USER RIGHTS</span>
-            <h2 class="font-cormorant text-2xl sm:text-3xl font-medium text-ink mt-1">
+            <h2 class="font-cormorant text-2xl sm:text-3xl font-medium text-ink mt-1 break-words">
               How Long Data Is Retained &amp; How to Delete It Immediately
             </h2>
           </div>
@@ -645,7 +656,7 @@
       <!-- SECTION 8: Children's Privacy, Policy Updates & Contact -->
       <article class="soft-card p-6 sm:p-8 policy-section" data-category="rights">
         <span class="eyebrow text-forest">08 · CHILDREN'S PRIVACY, UPDATES &amp; PRIVACY POINT OF CONTACT</span>
-        <h2 class="font-cormorant text-2xl sm:text-3xl font-medium text-ink mt-1">
+        <h2 class="font-cormorant text-2xl sm:text-3xl font-medium text-ink mt-1 break-words">
           Additional Legal Disclosures &amp; Contact Mechanism
         </h2>
         <div class="h-[1px] bg-borderWarm my-4"></div>
@@ -735,8 +746,8 @@
           filterButtons.forEach(function (other) {
             const selected = other === btn;
             other.className = selected
-              ? 'filter-chip px-3.5 py-1.5 rounded-full text-xs font-semibold bg-forest text-ivory border border-forest transition whitespace-nowrap'
-              : 'filter-chip px-3.5 py-1.5 rounded-full text-xs font-medium bg-parchment text-ink border border-borderWarm hover:border-stone transition whitespace-nowrap';
+              ? 'filter-chip shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-forest text-ivory border border-forest transition whitespace-nowrap'
+              : 'filter-chip shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium bg-parchment text-ink border border-borderWarm hover:border-stone transition whitespace-nowrap';
           });
           applyFilters();
         });
@@ -750,8 +761,8 @@
         filterButtons.forEach(function (other) {
           const isAll = other.getAttribute('data-filter') === 'all';
           other.className = isAll
-            ? 'filter-chip px-3.5 py-1.5 rounded-full text-xs font-semibold bg-forest text-ivory border border-forest transition whitespace-nowrap'
-            : 'filter-chip px-3.5 py-1.5 rounded-full text-xs font-medium bg-parchment text-ink border border-borderWarm hover:border-stone transition whitespace-nowrap';
+            ? 'filter-chip shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-forest text-ivory border border-forest transition whitespace-nowrap'
+            : 'filter-chip shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium bg-parchment text-ink border border-borderWarm hover:border-stone transition whitespace-nowrap';
         });
         applyFilters();
       });
